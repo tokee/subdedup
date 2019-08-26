@@ -144,5 +144,5 @@ file_checksums
 create_raw_folders
 create_folder_checksums
 create_duplicate_checksums
-${F}/duplicates_count
+duplicates_count
 echo "Done. Result available in ${F}/duplicates_count.dat"
