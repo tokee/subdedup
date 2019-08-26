@@ -131,18 +131,32 @@ print_duplicates() {
 }
 
 duplicates_count() {
-    echo " - Creating duplicates_count.dat"
-    LC_ALL=C sort -k2,2nbr -k1,1b ${F}/all_duplicates.dat > ${F}/all_duplicates_sorted_count.dat
-    print_duplicates "${F}/all_duplicates_sorted_count.dat" > ${F}/duplicates_count.dat
+    if [[ -s "${F}/all_duplicates_count_${MIN_COUNT}.dat" ]]; then
+        echo " - Skipping creation of duplicates_count_${MIN_COUNT}.dat as it already exists"
+        return
+    fi
+
+    echo " - Creating duplicates_count_${MIN_COUNT}.dat"
+    if [[ -s "${F}/all_duplicates_sorted_count.dat" ]]; then
+        echo "   - Skipping creation of ${F}/all_duplicates_sorted_count.dat as it already exists"
+    else
+        echo "   - Creating ${F}/all_duplicates_sorted_count.dat"
+        LC_ALL=C sort -k2,2nbr -k1,1b ${F}/all_duplicates.dat > ${F}/all_duplicates_sorted_count.dat
+    fi
+    echo "   - Extracting duplicates with MIN_COUNT==${MIN_COUNT}"
+    print_duplicates "${F}/all_duplicates_sorted_count.dat" > ${F}/duplicates_count_${MIN_COUNT}.dat
 
 #    echo " - Creating duplicates_size.dat"
 #    LC_ALL=C sort -k2,2nbr -k1,1b ${F}/all_duplicates.dat > ${F}/all_duplicates_sorted_count.dat
 #    print_duplicates "${F}/all_duplicates_sorted_count.dat" > duplicates_count.dat
 }
 
+START_TIME=$(date +%s)
 file_checksums
 create_raw_folders
 create_folder_checksums
 create_duplicate_checksums
 duplicates_count
-echo "Done. Result available in ${F}/duplicates_count.dat"
+END_TIME=$(date +%s)
+TOTAL_TIME=$(( END_TIME-START_TIME ))
+echo "Finished in ${TOTAL_TIME} seconds. Result available in ${F}/duplicates_count_${MIN_COUNT}.dat"
