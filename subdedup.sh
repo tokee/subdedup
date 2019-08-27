@@ -7,12 +7,25 @@
 : ${ROOT_FOLDER:="$1"}
 : ${F:="sums_files_$(sed 's/[\/ ]/_/g' <<< "$ROOT_FOLDER")"}
 : ${FILE_CHECKSUMS:="${F}/file_checksums.dat"}
+: ${FILE_SIZES:="${F}/file_sizes.dat"}
 : ${MIN_COUNT:="$2"}
 : ${MIN_COUNT:="2"} # 2+ = folders only, 1 = everything (including files)
 : ${DEST:="sums_folders.dat"}
 
 mkdir -p "$F"
 
+# filesize 1  filename
+file_sizes() {
+    if [[ -s "$FILE_SIZES" ]]; then
+        echo " - Skipping file size retrieval as $FILE_SIZES already exists"
+    else
+        echo " - retrieving file sizes for all files under '$ROOT_FOLDER', storing in $FILE_SIZES"
+        # TODO: Switch 1 and filesize
+        find "$ROOT_FOLDER" -type f -exec stat -c "%s %n" "{}" \; | sed 's/^/1 /' > "$FILE_SIZES"
+    fi
+}
+
+# checksum  filename
 file_checksums() {
     if [[ -s "$FILE_CHECKSUMS" ]]; then
         echo " - Skipping file checksum calculation as $FILE_CHECKSUMS already exists"
@@ -152,6 +165,8 @@ duplicates_count() {
 }
 
 START_TIME=$(date +%s)
+file_sizes
+exit
 file_checksums
 create_raw_folders
 create_folder_checksums
