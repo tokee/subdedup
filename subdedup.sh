@@ -5,6 +5,14 @@
 #
 
 : ${ROOT_FOLDER:="$1"}
+if [[ -z "$ROOT_FOLDER" ]]; then
+    >&2 echo "Usage: ./subdedup.sh <root folder>"
+    exit 2
+fi
+pushd "$ROOT_FOLDER"
+ROOT_FOLDER=$(pwd)
+popd > /dev/null
+
 : ${F:="sums_files_$(sed 's/[\/ ]/_/g' <<< "$ROOT_FOLDER")"}
 : ${FILE_CHECKSUMS:="${F}/file_checksums.dat"}
 : ${MIN_COUNT:="$2"}
@@ -12,6 +20,7 @@
 : ${DEST:="sums_folders.dat"}
 
 mkdir -p "$F"
+echo "$ROOT_FOLDER" > "${F}/root.dat"
 
 file_checksums() {
     if [[ -s "$FILE_CHECKSUMS" ]]; then
